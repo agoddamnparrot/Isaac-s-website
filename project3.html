@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Side Runner Game</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    #game {
+      position: relative;
+      width: 100vw;
+      height: 300px;
+      background: black;
+      border-bottom: 3px solid lime;
+      overflow: hidden;
+    }
+
+    #player {
+      position: absolute;
+      left: 50px;
+      bottom: 0;
+      width: 40px;
+      height: 40px;
+      background: lime;
+    }
+
+    .obstacle {
+      position: absolute;
+      bottom: 0;
+      width: 40px;
+      height: 40px;
+      background: red;
+    }
+
+    #info {
+      padding: 20px;
+      text-align: center;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+
+<div id="game">
+  <div id="player"></div>
+</div>
+
+<div id="info">Press SPACE to jump</div>
+
+<script>
+  const player = document.getElementById("player");
+  const game = document.getElementById("game");
+
+  let jumping = false;
+  let velocity = 0;
+  const gravity = 0.6;
+  const jumpStrength = 12;
+
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && !jumping) {
+      jumping = true;
+      velocity = jumpStrength;
+    }
+  });
+
+  function spawnObstacle() {
+    const obs = document.createElement("div");
+    obs.classList.add("obstacle");
+    obs.style.right = "-40px";
+    game.appendChild(obs);
+
+    let pos = -40;
+
+    const move = setInterval(() => {
+      pos += 5;
+      obs.style.right = pos + "px";
+
+      // Collision detection
+      const playerRect = player.getBoundingClientRect();
+      const obsRect = obs.getBoundingClientRect();
+
+      if (
+        playerRect.left < obsRect.right &&
+        playerRect.right > obsRect.left &&
+        playerRect.bottom > obsRect.top
+      ) {
+        alert("Game Over");
+        location.reload();
+      }
+
+      // Remove obstacle off screen
+      if (pos > window.innerWidth + 100) {
+        obs.remove();
+        clearInterval(move);
+      }
+    }, 20);
+  }
+
+  setInterval(spawnObstacle, 1500);
+
+  function gameLoop() {
+    if (jumping) {
+      player.style.bottom = parseInt(player.style.bottom || 0) + velocity + "px";
+      velocity -= gravity;
+
+      if (parseInt(player.style.bottom) <= 0) {
+        player.style.bottom = "0px";
+        jumping = false;
+      }
+    }
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  gameLoop();
+</script>
+
+</body>
+</html>
